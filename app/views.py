@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate,login,logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from app.models import *
 def home(request):
     if request.session.get('username'):
         username=request.session.get('username')
@@ -59,4 +60,22 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('home'))
-    
+
+@login_required
+def display_profile(request):
+    username=request.session.get('username')
+    UO=User.objects.get(username=username)
+    PO=Profile.objects.get(username=UO)
+    d={'UO':UO,'PO':PO}
+    return render(request,'display_profile.html',d)
+
+@login_required
+def change_password(request):
+    if request.method=='POST':
+        pw=request.POST['pw']
+        username=request.session.get('username')
+        UO=User.objects.get(username=username)
+        UO.save()
+        return HttpResponse('password changed successfully')
+    return render(request,'change_password.html')
+
